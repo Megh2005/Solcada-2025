@@ -1,0 +1,167 @@
+flowchart TD
+    %% Background and theme settings
+    %%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#003300', 'secondaryColor': '#006600', 'tertiaryColor': '#009900', 'primaryTextColor': '#00cc00', 'lineColor': '#00cc00', 'edgeLabelBackground': '#001100', 'background': '#001100' }}}%%
+    
+    subgraph On_Chain["On-Chain Components"]
+        subgraph StakingModule["Staking Module"]
+            StakingContract["Staking Contract
+            ---
+            - accept_stake(wallet): bool
+            - verify_stake(wallet): bool
+            - get_stake_amount(): u64
+            - withdraw_stake(wallet): bool"]
+        end
+        
+        subgraph RewardModule["Reward Distribution"]
+            RewardContract["Reward Contract
+            ---
+            - calculate_rewards(): void
+            - distribute_prizes(rankings): bool
+            - get_prize_pool(): u64
+            - emergency_withdraw(): bool"]
+        end
+        
+        subgraph BlockchainData["Solana Blockchain Data"]
+            SolanaBlockchain["Block Hashes & Transactions
+            ---
+            - get_block_hash(height): string
+            - get_transaction(sig): Transaction
+            - verify_signature(sig): bool"]
+        end
+    end
+    
+    subgraph Off_Chain["Off-Chain Components"]
+        subgraph PuzzleSystem["Puzzle Management System"]
+            PuzzleServer["Puzzle Server
+            ---
+            - get_puzzle(level): Puzzle
+            - check_solution(input): bool
+            - get_next_puzzle(user): Puzzle
+            - track_progress(user, puzzle): void"]
+            
+            UserDB["User Database
+            ---
+            - store_user(wallet): User
+            - get_progress(user): Progress
+            - update_score(user, points): void
+            - store_solution_attempt(user, puzzle, attempt): void"]
+        end
+        
+        subgraph AssistanceSystem["Player Assistance"]
+            HintSystem["Hint System
+            ---
+            - get_hint(user, puzzle, level): Hint
+            - calculate_penalty(hint_level): u32
+            - record_hint_usage(user, hint): void"]
+        end
+        
+        subgraph ValidationAndScoring["Validation & Scoring"]
+            ValidationSystem["Solution Validation
+            ---
+            - validate_solution(puzzle, answer): bool
+            - check_solution_format(input): bool
+            - verify_blockchain_answer(input): bool"]
+            
+            ScoringSystem["Scoring System
+            ---
+            - calculate_score(user, time, hints): u32
+            - update_ranking(user, score): void
+            - get_time_bonus(time): u32
+            - apply_hint_penalty(score, hints): u32"]
+            
+            LeaderboardSystem["Leaderboard
+            ---
+            - get_rankings(): Ranking[]
+            - update_leaderboard(): void
+            - get_user_rank(user): u32"]
+        end
+    end
+    
+    subgraph Frontend["User Interface"]
+        UI["Web Application
+        ---
+        - render_interface(): void
+        - handle_user_input(): void
+        - display_puzzle(puzzle): void"]
+        
+        WalletConnection["Wallet Integration
+        ---
+        - connect_wallet(): Wallet
+        - sign_transaction(tx): Signature
+        - get_wallet_balance(): u64"]
+        
+        PuzzleInterface["Puzzle Interface
+        ---
+        - display_current_puzzle(): void
+        - submit_solution(answer): bool
+        - request_hint(): Hint
+        - show_progress_map(): void"]
+        
+        UserProfile["User Dashboard
+        ---
+        - show_stats(user): void
+        - display_achievements(): void
+        - show_progress(): void
+        - get_hint_usage(): u32"]
+    end
+    
+    subgraph Puzzle_Sources["Solana Ecosystem Data Sources"]
+        SolanaDEXs["DEX Integrations
+        ---
+        - get_pool_data(pool): PoolData
+        - fetch_price_data(token): PriceData
+        - get_liquidity_info(pair): LiquidityInfo"]
+        
+        SolanaPrograms["Program References
+        ---
+        - get_program_id(name): ProgramId
+        - fetch_program_data(id): ProgramData
+        - parse_instruction(ix): InstructionData"]
+        
+        CommunityProducts["Community Products
+        ---
+        - get_metadata(product): Metadata
+        - fetch_stats(product): ProductStats
+        - list_integrations(): Integration[]"]
+    end
+    
+    %% Connections with solid arrows
+    User((User)) --> UI
+    UI --> WalletConnection
+    WalletConnection --> StakingContract
+    UI --> PuzzleInterface
+    PuzzleInterface --> PuzzleServer
+    
+    PuzzleServer --> ValidationSystem
+    PuzzleServer --> HintSystem
+    ValidationSystem --> ScoringSystem
+    HintSystem --> ScoringSystem
+    ScoringSystem --> LeaderboardSystem
+    
+    PuzzleServer --> UserDB
+    UserDB --> UserProfile
+    
+    StakingContract --> SolanaBlockchain
+    RewardContract --> SolanaBlockchain
+    
+    PuzzleServer --> SolanaDEXs
+    PuzzleServer --> SolanaPrograms
+    PuzzleServer --> CommunityProducts
+    PuzzleServer --> SolanaBlockchain
+    
+    ScoringSystem --> RewardContract
+    
+    %% Styling for dark theme with deep green
+    classDef onChain fill:#006600,stroke:#00ff00,stroke-width:2px,color:#00ff00;
+    classDef offChain fill:#004400,stroke:#00ff00,stroke-width:2px,color:#00ff00;
+    classDef frontend fill:#003300,stroke:#00ff00,stroke-width:2px,color:#00ff00;
+    classDef puzzleSrc fill:#002200,stroke:#00ff00,stroke-width:2px,color:#00ff00;
+    classDef user fill:#000000,stroke:#00ff00,stroke-width:2px,color:#00ff00;
+    classDef subgraphStyle fill:#001100,stroke:#008800,stroke-width:2px,color:#00ff00;
+    
+    class StakingContract,RewardContract,SolanaBlockchain onChain;
+    class PuzzleServer,UserDB,HintSystem,ValidationSystem,ScoringSystem,LeaderboardSystem offChain;
+    class UI,WalletConnection,PuzzleInterface,UserProfile frontend;
+    class SolanaDEXs,SolanaPrograms,CommunityProducts puzzleSrc;
+    class User user;
+    class StakingModule,RewardModule,BlockchainData,PuzzleSystem,AssistanceSystem,ValidationAndScoring,Frontend,Puzzle_Sources subgraphStyle;
